@@ -45,7 +45,11 @@ private:
 		grand_mean, // Mean of Entire Dataset
 		ssb,		// Sum of Squares Between Groups
 		ssw,		// Sum of Squares Within Groups
-		sst;		// Sum of Squares Total
+		sst,		// Sum of Squares Total
+		unadjusted_r2, // Unadjusted R^2 Value
+		shrunken_r2,   // Shrunken R^2 Value
+		adjusted_w2,	// Adjusted Omega Squared Value
+		power;			// Power of a test
 	int total_samples;	// Number of Samples in Dataset (N)
 	void  calc_grand_mean(); // Calculates Grand Mean
 	void  calc_sum_of_squares(); // Calculates Sum of Squares
@@ -55,9 +59,13 @@ public:
 	~Data();				  // Destructor
 	/*--- Accessor Functions ---*/
 	float get_grand_mean() { return grand_mean; };
+	float get_f_crit() { return f_crit; };
+	float get_unadjusted_R(){ return unadjusted_r2; };
 	std::vector<Group> get_dataset() { return dataset; };
+	float get_power() { return power; };
 	/*--- Member Functions ---*/
 	void calc_f_crit(int, int, float); // Calculate Critical Value for F Distribution
+	void calc_f_power(int, int, float, float); // Calculate Power using Non-Central F Distribution
 	void f_test(Group, Group);	// F Test on Specified Groups
 	void f_test();	// F Test on First Two Groups in Dataset
 	void anova();   // One-way ANOVA Test on Entire Dataset

@@ -8,6 +8,7 @@
 #include <math.h> // Math Functions
 #include <iostream> // I/O Support
 #include <boost/math/distributions/fisher_f.hpp> // F distribution functions, i.e., calculate critical values
+#include <boost/math/distributions/non_central_f.hpp>
 
 /*---- Name Spaces ----*/
 using namespace boost::math;
@@ -110,6 +111,19 @@ void Data::calc_f_crit(int dof_1, int dof_2, float alpha) {
 	f_crit =  quantile(complement(dist, alpha)); // Calculate Critical Value
 	inv_f_crit = quantile(complement(inv_dist, alpha));
 	inv_f_crit = 1 / inv_f_crit;
+}
+
+
+/*---------------------------------------------------------*/
+/*--- Class: Data                                   -------*/
+/*--- Calculates Critical Value of F Distribution   -------*/
+/*--- Input: Dof Numerator, Dof Denomerator, Error Rate ---*/
+/*---------------------------------------------------------*/
+void Data::calc_f_power(int dof_1, int dof_2, float alpha, float lambda) {
+	fisher_f dist(dof_1, dof_2);     // Create F Distribution
+	non_central_f non_dist(dof_1, dof_2, lambda);     // Create F Distribution
+	f_crit = quantile(complement(dist, alpha)); // Calculate Critical Value
+	power = 1 - cdf(non_dist, f_crit);
 }
 
 /*----------------------------------------------------*/
@@ -229,7 +243,15 @@ void Data::anova() {
 	/*--- Calculate F Score ---*/
 	f_score = msb / msw;
 	/*--- Calculate Critical Value ---*/
-	calc_f_crit(df_between, df_within, 0.025);
+	calc_f_crit(df_between, df_within, 0.05);
+	/*--- Calculate Unadjusted R^2 ---*/
+	unadjusted_r2 = ssb / sst;
+	/*--- Calculate Shrunken R^2 ---*/
+	shrunken_r2 = 1 - ((float)df_total / df_within * (1 - unadjusted_r2));
+	/*--- Calculate Adjusted W^2 ---*/
+	adjusted_w2 = (ssb - df_between*msw) /( sst + msw);
+	/*--- Calculate Power ---*/
+	calc_f_power(df_between, df_within, 0.05, 0.25*0.25*df_between*df_within);
 	/*--- Print Source Table ---*/
 	cout <<
 		"____________________________________\n"
@@ -259,6 +281,10 @@ void Data::anova() {
 	cout << endl << endl;
 	cout << "____________________________________\n\n";
 	printf("F Crit value at p < .05 = %f \n", f_crit);
+	printf("Unadjusted R^2 Value = %f \n", unadjusted_r2);
+	printf("Shrunken R^2 Value = %f \n", shrunken_r2);
+	printf("Adjusted W^2 Value = %f \n", adjusted_w2);
+	printf("Power Value = %f \n", power);
 	printf("Conclusion:   ");
 	/*--- Determine To Reject or Accepet Null Hypothesis ---*/
 	if (f_crit < f_score)
