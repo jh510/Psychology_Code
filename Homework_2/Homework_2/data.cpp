@@ -116,7 +116,7 @@ void Data::calc_f_crit(int dof_1, int dof_2, float alpha) {
 
 /*---------------------------------------------------------*/
 /*--- Class: Data                                   -------*/
-/*--- Calculates Critical Value of F Distribution   -------*/
+/*--- Calculates Power                              -------*/
 /*--- Input: Dof Numerator, Dof Denomerator, Error Rate ---*/
 /*---------------------------------------------------------*/
 void Data::calc_f_power(int dof_1, int dof_2, float alpha, float lambda) {
